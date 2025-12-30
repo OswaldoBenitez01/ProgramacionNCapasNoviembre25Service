@@ -198,6 +198,7 @@ public class UsuarioJPADAOImplementation implements IUsuarioJPA{
                 result.StatusCode = 404;
                 return result;
             }
+
             usuario.Direcciones = usuarioDB.Direcciones;
             usuario.setImagen(usuarioDB.getImagen());
             entityManager.merge(usuario);
@@ -245,7 +246,7 @@ public class UsuarioJPADAOImplementation implements IUsuarioJPA{
     
     @Override
     @Transactional
-    public Result UpdatePhoto(Integer IdUsuario, MultipartFile imagenUsuario) {
+    public Result UpdatePhoto(Integer IdUsuario, String imagenUsuario) {
         Result result = new Result();
         try {
             Usuario usuarioDB = entityManager.find(Usuario.class, IdUsuario);
@@ -254,14 +255,8 @@ public class UsuarioJPADAOImplementation implements IUsuarioJPA{
                 result.ErrorMessage = "No se encontro al usuario";
                 return result;
             }
-            if (imagenUsuario == null || imagenUsuario.isEmpty()) {
-                result.Correct = false;
-                result.ErrorMessage = "No es posible procesar el archivo";
-                result.StatusCode = 400;        
-            }
             
-            String encodedString = Base64.getEncoder().encodeToString(imagenUsuario.getBytes());
-            usuarioDB.setImagen(encodedString);
+            usuarioDB.setImagen(imagenUsuario);
             entityManager.merge(usuarioDB);
             result.Correct = true;
             result.StatusCode = 200;
@@ -302,6 +297,33 @@ public class UsuarioJPADAOImplementation implements IUsuarioJPA{
             result.StatusCode = 500;
         }
         return result;
-    }        
+    }
+    
+    @Override
+    @Transactional
+    public Result DeletePhoto(Integer IdUsuario) {
+        Result result = new Result();
+        try {
+            Usuario usuarioDB = entityManager.find(Usuario.class, IdUsuario);
+            if (usuarioDB == null) {
+                result.Correct = false;
+                result.ErrorMessage = "No se encontró al usuario";
+                result.StatusCode = 404;
+                return result;
+            }
+
+            usuarioDB.setImagen(null);
+            entityManager.merge(usuarioDB);
+
+            result.Correct = true;
+            result.StatusCode = 200;
+        } catch (Exception ex) {
+            result.Correct = false;
+            result.ErrorMessage = ex.getLocalizedMessage();
+            result.ex = ex;
+            result.StatusCode = 500;
+        }
+        return result;
+    }
 
 }

@@ -13,8 +13,10 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -38,19 +40,19 @@ public class UsuarioRestController {
     }
     
     @PostMapping("/busqueda")
-    public ResponseEntity BusquedaAbierta(@ModelAttribute Usuario usuario){
+    public ResponseEntity BusquedaAbierta(@RequestBody Usuario usuario){
         Result result = usuarioJPADAOImplementation.BusquedaUser(usuario);
         return ResponseEntity.status(result.StatusCode).body(result);
     }
     
-    @PostMapping("/add")
-    public ResponseEntity Add(@ModelAttribute Usuario usuario){
+    @PostMapping
+    public ResponseEntity Add(@RequestBody Usuario usuario){
         Result result = usuarioJPADAOImplementation.Add(usuario);
         return ResponseEntity.status(result.StatusCode).body(result);
     }
     
     @PutMapping
-    public ResponseEntity UpdateUser(@ModelAttribute Usuario usuario){
+    public ResponseEntity UpdateUser(@RequestBody Usuario usuario){
         Result result = usuarioJPADAOImplementation.UpdateUser(usuario);
         return ResponseEntity.status(result.StatusCode).body(result);
     }
@@ -61,9 +63,15 @@ public class UsuarioRestController {
         return ResponseEntity.status(result.StatusCode).body(result);
     }
     
-    @PostMapping("/updatePhoto")
-    public ResponseEntity UpdatePhoto(@ModelAttribute Usuario usuario, @PathVariable("imagenUsuario") MultipartFile imagenUsuario) {
-        Result result = usuarioJPADAOImplementation.UpdatePhoto(usuario.getIdUsuario(), imagenUsuario);
+    @PostMapping("/{IdUsuario}/updatePhoto")
+    public ResponseEntity UpdatePhoto(@PathVariable int IdUsuario, @RequestBody String imagenUsuario) {
+        Result result = usuarioJPADAOImplementation.UpdatePhoto(IdUsuario, imagenUsuario);
+        return ResponseEntity.status(result.StatusCode).body(result);
+    }
+    
+    @DeleteMapping("/{IdUsuario}/photo")
+    public ResponseEntity<Result> deletePhoto(@PathVariable int IdUsuario) {
+        Result result = usuarioJPADAOImplementation.DeletePhoto(IdUsuario);
         return ResponseEntity.status(result.StatusCode).body(result);
     }
     

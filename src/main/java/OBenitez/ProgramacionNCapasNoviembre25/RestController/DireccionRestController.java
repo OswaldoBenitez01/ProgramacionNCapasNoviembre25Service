@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -22,7 +23,7 @@ public class DireccionRestController {
     private DireccionJPADAOImplementation direccionJPADAOImplementation;
     
     @PostMapping
-    public ResponseEntity AddAddress(@ModelAttribute Direccion direccion){
+    public ResponseEntity AddAddress(@RequestBody Direccion direccion){
         Result result = direccionJPADAOImplementation.AddAddress(direccion);
         return ResponseEntity.status(result.StatusCode).body(result);
     }
@@ -34,7 +35,7 @@ public class DireccionRestController {
     }
     
     @PutMapping
-    public ResponseEntity UpdateAddress(@ModelAttribute Direccion direccion){
+    public ResponseEntity UpdateAddress(@RequestBody Direccion direccion){
         Result result = direccionJPADAOImplementation.UpdateAddressById(direccion);
         return ResponseEntity.status(result.StatusCode).body(result);
     }

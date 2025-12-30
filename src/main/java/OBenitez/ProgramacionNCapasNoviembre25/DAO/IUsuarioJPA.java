@@ -18,7 +18,8 @@ public interface IUsuarioJPA {
 //    //UPDATES
     public Result UpdateUser(Usuario usuario);
     public Result UpdateStatusById(Integer IdUsuario, Integer status);
-    public Result UpdatePhoto(Integer IdUsuario, MultipartFile imagenUsuario);
+    public Result UpdatePhoto(Integer IdUsuario, String imagenUsuario);
 //    //DELETES
     public Result DeleteUserById(int IdUsuario);
+    public Result DeletePhoto(Integer IdUsuario);
 }
