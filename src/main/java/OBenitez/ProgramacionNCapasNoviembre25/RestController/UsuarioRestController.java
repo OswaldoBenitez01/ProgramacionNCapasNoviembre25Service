@@ -7,7 +7,15 @@ import OBenitez.ProgramacionNCapasNoviembre25.JPA.Direccion;
 import OBenitez.ProgramacionNCapasNoviembre25.JPA.Result;
 import OBenitez.ProgramacionNCapasNoviembre25.JPA.Rol;
 import OBenitez.ProgramacionNCapasNoviembre25.JPA.Usuario;
-import jakarta.servlet.http.HttpSession;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -18,10 +26,8 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -33,28 +39,82 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @RestController
 @RequestMapping("api/usuario")
+@Tag(name = "API de Usuario")
 public class UsuarioRestController {
     
     @Autowired
     private UsuarioJPADAOImplementation usuarioJPADAOImplementation;
     
     @GetMapping
+    @Operation(
+            summary = "Extraer usuarios", 
+            description = "Extrae un listado de cada usuario de la base de datos"
+    )
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", 
+                    description = "Usuarios encontrados",
+                    content = @Content(
+                            mediaType = "application/json",
+                            array = @ArraySchema(schema = @Schema(implementation = Usuario.class))
+                    )),
+        @ApiResponse(responseCode = "404", 
+                    description = "No se encontraron usuarios",
+                    content = @Content()),
+        @ApiResponse(responseCode = "500", 
+                    description = "Error en la solicitud", 
+                    content = @Content())
+    })
     public ResponseEntity GetAll(){
         Result result = usuarioJPADAOImplementation.GetAll();
         return ResponseEntity.status(result.StatusCode).body(result);
     }
     
     @GetMapping("/{IdUsuario}")
-    public ResponseEntity GetById(@PathVariable int IdUsuario){
+    @Operation(
+            summary = "Extraer detalle de usuario", 
+            description = "Extrae informacion detallada de un usuario en especifico"
+    )
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", 
+                    description = "Usuario encontrado",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = Usuario.class)
+                    )),
+        @ApiResponse(responseCode = "404", 
+                    description = "Usuario no encontrado",
+                    content = @Content()),
+        @ApiResponse(responseCode = "500", 
+                    description = "Error en la solicitud", 
+                    content = @Content())
+    })
+    public ResponseEntity GetById(@PathVariable @Parameter(description = "Id del usuario", example = "1") int IdUsuario ){
         Result result = usuarioJPADAOImplementation.GetById(IdUsuario);
         return ResponseEntity.status(result.StatusCode).body(result);
     }
     
     @PostMapping("/busqueda")
+    @Operation(
+            summary = "Busqueda de usuarios", 
+            description = "Realiza una busqueda de usuarios por medio de parametros"
+    )
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", 
+                    description = "Usuarios encontrados",
+                    content = @Content(
+                            mediaType = "application/json",
+                            array = @ArraySchema(schema = @Schema(implementation = Usuario.class))
+                    )),
+        @ApiResponse(responseCode = "404", 
+                    description = "No se encontraron usuarios",
+                    content = @Content()),
+        @ApiResponse(responseCode = "500", 
+                    description = "Error en la solicitud", 
+                    content = @Content())
+    })
     public ResponseEntity BusquedaAbierta(@RequestBody Usuario usuario){
         Result result = usuarioJPADAOImplementation.BusquedaUser(usuario);
         return ResponseEntity.status(result.StatusCode).body(result);
@@ -112,7 +172,7 @@ public class UsuarioRestController {
             String extension = file.getOriginalFilename().split("\\.")[1];
             
             String path = System.getProperty("user.dir");
-            String pathArchivo = "src/main/resources/archivos";
+            String pathArchivo = "src/main/resources/archivos/";
             String rutaAbsoluta = path + "/" + pathArchivo;
             
             String nombreArchivo = token + "." + extension;
@@ -154,7 +214,7 @@ public class UsuarioRestController {
         Result result = new Result();
         try {
             String path = System.getProperty("user.dir");
-            String pathArchivo = "src/main/resources/archivos";
+            String pathArchivo = "src/main/resources/archivos/";
             String rutaAbsoluta = path + "/" + pathArchivo;
             
             File directorio = new File(rutaAbsoluta);
@@ -195,10 +255,13 @@ public class UsuarioRestController {
             }
             
             //result = usuarioJPADAOImplementation.AddAll(usuarios);
+            result.Correct = true;
             if (result.Correct) {
                 result.Object = "Se agregaron " + usuarios.size() + " usuarios";
+                result.StatusCode = 200;
             } else {
                 result.Object = "No fue posible agregar a los usuarios";
+                result.StatusCode = 400;
             }
         } catch (Exception ex) {
             result.Correct = true;
