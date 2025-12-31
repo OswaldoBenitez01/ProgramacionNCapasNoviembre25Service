@@ -27,21 +27,19 @@ public class RolJPADAOImplementation implements IRol{
                 result.Correct = false;
                 result.ErrorMessage = "No se encontraron roles";
                 result.StatusCode = 404;
-            } else {
                 result.Objects = new ArrayList<>();
-                result.Objects.addAll(rolesJPA);
-                result.Correct = true;
-                result.StatusCode = 200;
+                return result;
             }
             
+            result.Objects = new ArrayList<>(rolesJPA);
+            result.Correct = true;
+            result.StatusCode = 200;
         } catch (Exception ex) {
             result.Correct = false;
             result.ErrorMessage = ex.getLocalizedMessage();
             result.ex = ex;
             result.StatusCode = 500;
         }
-        
         return result;
     }
-    
 }

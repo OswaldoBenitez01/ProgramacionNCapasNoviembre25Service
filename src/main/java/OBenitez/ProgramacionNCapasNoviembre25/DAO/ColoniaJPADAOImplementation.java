@@ -28,20 +28,19 @@ public class ColoniaJPADAOImplementation implements IColonia{
                 result.Correct = false;
                 result.ErrorMessage = "No se encontraron colonias";
                 result.StatusCode = 404;
-            } else {
                 result.Objects = new ArrayList<>();
-                result.Objects.addAll(coloniasJPA);
-                result.Correct = true;
-                result.StatusCode = 200;
-            }
+                return result;
+            } 
             
+            result.Objects = new ArrayList<>(coloniasJPA);
+            result.Correct = true;
+            result.StatusCode = 200;
         } catch (Exception ex) {
             result.Correct = false;
             result.ErrorMessage = ex.getLocalizedMessage();
             result.ex = ex;
             result.StatusCode = 500;
         }
-        
         return result;
     }
     

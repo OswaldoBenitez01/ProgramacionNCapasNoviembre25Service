@@ -24,6 +24,7 @@ public class DireccionJPADAOImplementation implements IDireccion{
                 result.Correct = false;
                 result.ErrorMessage = "La direccion debe incluir un usuario valido";
                 result.StatusCode = 400;
+                return result;
             }
             
             Usuario usuarioDB = entityManager.find(Usuario.class, direccion.Usuario.getIdUsuario());
@@ -44,14 +45,12 @@ public class DireccionJPADAOImplementation implements IDireccion{
             
             result.Correct = true;
             result.StatusCode = 201;
-            
         } catch (Exception ex) {
             result.Correct = false;
             result.ErrorMessage = ex.getLocalizedMessage();
             result.ex = ex;
             result.StatusCode = 500;
         }
-        
         return result;
     }
 
@@ -88,7 +87,6 @@ public class DireccionJPADAOImplementation implements IDireccion{
             result.ex = ex;
             result.StatusCode = 500;
         }
-        
         return result;
     }
 
@@ -116,7 +114,6 @@ public class DireccionJPADAOImplementation implements IDireccion{
             result.ex = ex;
             result.StatusCode = 500;
         }
-        
         return result;
     }
 }

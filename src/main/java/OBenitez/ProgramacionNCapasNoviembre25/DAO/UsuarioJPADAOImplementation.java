@@ -11,11 +11,9 @@ import jakarta.persistence.StoredProcedureQuery;
 import jakarta.persistence.TypedQuery;
 import jakarta.transaction.Transactional;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
-import org.springframework.web.multipart.MultipartFile;
 
 @Repository
 public class UsuarioJPADAOImplementation implements IUsuarioJPA{
@@ -37,17 +35,19 @@ public class UsuarioJPADAOImplementation implements IUsuarioJPA{
                 result.Correct = false;
                 result.ErrorMessage = "No se encontraron usuarios";
                 result.StatusCode = 404;
-            } else {
                 result.Objects = new ArrayList<>();
-                result.Objects.addAll(usuariosJPA);
-                result.Correct = true;
-                result.StatusCode = 200;
+                return result;
             }
+            
+            result.Objects = new ArrayList<>(usuariosJPA);
+            result.Correct = true;
+            result.StatusCode = 200;
             
         } catch (Exception ex) {
             result.Correct = false;
             result.ErrorMessage = ex.getLocalizedMessage();
             result.ex = ex;
+            result.StatusCode = 500;
         }
         return result;
     }
@@ -63,16 +63,18 @@ public class UsuarioJPADAOImplementation implements IUsuarioJPA{
                 result.Correct = false;
                 result.ErrorMessage = "Usuario no encontrado";
                 result.StatusCode = 404;
-            } else {
-                result.Object = usuarioDB;
-                result.Correct = true;
-                result.StatusCode = 200;
-            }
+                return result;
+            } 
+            
+            result.Object = usuarioDB;
+            result.Correct = true;
+            result.StatusCode = 200;
             
         } catch (Exception ex) {
             result.Correct = false;
             result.ErrorMessage = ex.getLocalizedMessage();
             result.ex = ex;
+            result.StatusCode = 500;
         }
         return result;
     }
@@ -97,18 +99,18 @@ public class UsuarioJPADAOImplementation implements IUsuarioJPA{
             query.setParameter("pIdRol", idRol);
 
             List<Usuario> usuariosJPA = query.getResultList();
-            
 
             if (usuariosJPA.isEmpty()) {
                 result.Correct = false;
                 result.ErrorMessage = "No se encontraron usuarios";
                 result.StatusCode = 404;
                 result.Objects = new ArrayList<>();
-            } else {
-                result.Objects = new ArrayList<>(usuariosJPA);
-                result.Correct = true;
-                result.StatusCode = 200;
+                return result;
             }
+            
+            result.Objects = new ArrayList<>(usuariosJPA);
+            result.Correct = true;
+            result.StatusCode = 200;
 
         } catch (Exception ex) {
             result.Correct = false;
@@ -125,7 +127,6 @@ public class UsuarioJPADAOImplementation implements IUsuarioJPA{
     public Result Add(Usuario usuario) {
         Result result = new Result();
         usuario.setIdUsuario(null); //Para qeu no choque con el id 
-
         try {
             if (usuario.getDirecciones() != null && !usuario.getDirecciones().isEmpty()) {
                 for (Direccion direccion : usuario.getDirecciones()) {
@@ -136,7 +137,6 @@ public class UsuarioJPADAOImplementation implements IUsuarioJPA{
                     }
                 }
             }
-
             entityManager.persist(usuario);
             entityManager.flush();
             
@@ -189,7 +189,6 @@ public class UsuarioJPADAOImplementation implements IUsuarioJPA{
         Result result = new Result();
         
         try {
-            
             Usuario usuarioDB = entityManager.find(Usuario.class, usuario.getIdUsuario());
             
             if (usuarioDB == null) {
@@ -209,8 +208,8 @@ public class UsuarioJPADAOImplementation implements IUsuarioJPA{
             result.Correct = false;
             result.ErrorMessage = ex.getLocalizedMessage();
             result.ex = ex;
+            result.StatusCode = 500;
         }
-        
         return result;
     }
 
@@ -220,8 +219,8 @@ public class UsuarioJPADAOImplementation implements IUsuarioJPA{
         Result result = new Result();
         
         try {
-            
             Usuario usuarioDB = entityManager.find(Usuario.class, IdUsuario);
+            
             if (usuarioDB == null) {
                 result.Correct = false;
                 result.ErrorMessage = "No se encontro al usuario";
@@ -253,6 +252,7 @@ public class UsuarioJPADAOImplementation implements IUsuarioJPA{
             if (usuarioDB == null) {
                 result.Correct = false;
                 result.ErrorMessage = "No se encontro al usuario";
+                result.StatusCode = 404;
                 return result;
             }
             
@@ -307,7 +307,7 @@ public class UsuarioJPADAOImplementation implements IUsuarioJPA{
             Usuario usuarioDB = entityManager.find(Usuario.class, IdUsuario);
             if (usuarioDB == null) {
                 result.Correct = false;
-                result.ErrorMessage = "No se encontró al usuario";
+                result.ErrorMessage = "Usuario no encontrado";
                 result.StatusCode = 404;
                 return result;
             }
@@ -325,5 +325,4 @@ public class UsuarioJPADAOImplementation implements IUsuarioJPA{
         }
         return result;
     }
-
 }

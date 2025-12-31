@@ -27,14 +27,15 @@ public class MunicipioJPADAOImplementation implements IMunicipio{
             
             if (municipiosJPA.isEmpty()) {
                 result.Correct = false;
-                result.ErrorMessage = "No se encontraron estados";
+                result.ErrorMessage = "No se encontraron municipios";
                 result.StatusCode = 404;
-            } else {
                 result.Objects = new ArrayList<>();
-                result.Objects.addAll(municipiosJPA);
-                result.Correct = true;
-                result.StatusCode = 200;
-            }
+                return result;
+            } 
+            
+            result.Objects = new ArrayList<>(municipiosJPA);
+            result.Correct = true;
+            result.StatusCode = 200;
             
         } catch (Exception ex) {
             result.Correct = false;
@@ -42,7 +43,6 @@ public class MunicipioJPADAOImplementation implements IMunicipio{
             result.ex = ex;
             result.StatusCode = 500;
         }
-        
         return result;
     }
 }
