@@ -41,7 +41,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("api/usuario")
-@Tag(name = "API de Usuario")
+@Tag(name = "API de Usuario", description = "Operaciones CRUD y gestión de usuarios")
 public class UsuarioRestController {
     
     @Autowired
@@ -50,21 +50,14 @@ public class UsuarioRestController {
     @GetMapping
     @Operation(
             summary = "Extraer usuarios", 
-            description = "Extrae un listado de cada usuario de la base de datos"
+            description = "Obtiene un listado de todos los usuarios registrados en la base de datos"
     )
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", 
-                    description = "Usuarios encontrados",
-                    content = @Content(
-                            mediaType = "application/json",
-                            array = @ArraySchema(schema = @Schema(implementation = Usuario.class))
-                    )),
-        @ApiResponse(responseCode = "404", 
-                    description = "No se encontraron usuarios",
-                    content = @Content()),
-        @ApiResponse(responseCode = "500", 
-                    description = "Error en la solicitud", 
-                    content = @Content())
+        @ApiResponse(responseCode = "200", description = "Usuarios encontrados",
+                content = @Content(mediaType = "application/json",
+                        array = @ArraySchema(schema = @Schema(implementation = Usuario.class)))),
+        @ApiResponse(responseCode = "404", description = "No se encontraron usuarios"),
+        @ApiResponse(responseCode = "500", description = "Error en la solicitud")
     })
     public ResponseEntity GetAll(){
         Result result = usuarioJPADAOImplementation.GetAll();
@@ -74,88 +67,153 @@ public class UsuarioRestController {
     @GetMapping("/{IdUsuario}")
     @Operation(
             summary = "Extraer detalle de usuario", 
-            description = "Extrae informacion detallada de un usuario en especifico"
+            description = "Obtiene información detallada de un usuario específico"
     )
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", 
-                    description = "Usuario encontrado",
-                    content = @Content(
-                            mediaType = "application/json",
-                            schema = @Schema(implementation = Usuario.class)
-                    )),
-        @ApiResponse(responseCode = "404", 
-                    description = "Usuario no encontrado",
-                    content = @Content()),
-        @ApiResponse(responseCode = "500", 
-                    description = "Error en la solicitud", 
-                    content = @Content())
+        @ApiResponse(responseCode = "200", description = "Usuario encontrado",
+                content = @Content(mediaType = "application/json",
+                        schema = @Schema(implementation = Usuario.class))),
+        @ApiResponse(responseCode = "404", description = "Usuario no encontrado"),
+        @ApiResponse(responseCode = "500", description = "Error en la solicitud")
     })
-    public ResponseEntity GetById(@PathVariable @Parameter(description = "Id del usuario", example = "1") int IdUsuario ){
+    public ResponseEntity GetById(
+            @PathVariable 
+            @Parameter(description = "Id del usuario", example = "1") int IdUsuario ){
         Result result = usuarioJPADAOImplementation.GetById(IdUsuario);
         return ResponseEntity.status(result.StatusCode).body(result);
     }
     
     @PostMapping("/busqueda")
     @Operation(
-            summary = "Busqueda de usuarios", 
-            description = "Realiza una busqueda de usuarios por medio de parametros"
+            summary = "Búsqueda de usuarios", 
+            description = "Realiza una búsqueda de usuarios mediante parámetros enviados en el cuerpo"
     )
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", 
-                    description = "Usuarios encontrados",
-                    content = @Content(
-                            mediaType = "application/json",
-                            array = @ArraySchema(schema = @Schema(implementation = Usuario.class))
-                    )),
-        @ApiResponse(responseCode = "404", 
-                    description = "No se encontraron usuarios",
-                    content = @Content()),
-        @ApiResponse(responseCode = "500", 
-                    description = "Error en la solicitud", 
-                    content = @Content())
+        @ApiResponse(responseCode = "200", description = "Usuarios encontrados",
+                content = @Content(mediaType = "application/json",
+                        array = @ArraySchema(schema = @Schema(implementation = Usuario.class)))),
+        @ApiResponse(responseCode = "404", description = "No se encontraron usuarios"),
+        @ApiResponse(responseCode = "500", description = "Error en la solicitud")
     })
-    public ResponseEntity BusquedaAbierta(@RequestBody Usuario usuario){
+    public ResponseEntity BusquedaAbierta(
+            @RequestBody 
+            @Parameter(description = "Objeto usuario con parámetros de búsqueda") Usuario usuario){
         Result result = usuarioJPADAOImplementation.BusquedaUser(usuario);
         return ResponseEntity.status(result.StatusCode).body(result);
     }
     
     @PostMapping
-    public ResponseEntity Add(@RequestBody Usuario usuario){
+    @Operation(
+            summary = "Agregar usuario", 
+            description = "Agrega un nuevo usuario a la base de datos"
+    )
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "201", description = "Usuario creado exitosamente",
+                content = @Content(mediaType = "application/json",
+                        schema = @Schema(implementation = Usuario.class))),
+        @ApiResponse(responseCode = "400", description = "Datos inválidos"),
+        @ApiResponse(responseCode = "500", description = "Error en la solicitud")
+    })
+    public ResponseEntity Add(
+            @RequestBody 
+            @Parameter(description = "Objeto usuario a registrar") Usuario usuario){
         Result result = usuarioJPADAOImplementation.Add(usuario);
         return ResponseEntity.status(result.StatusCode).body(result);
     }
     
     @PutMapping
-    public ResponseEntity UpdateUser(@RequestBody Usuario usuario){
+    @Operation(
+            summary = "Actualizar usuario", 
+            description = "Actualiza la información de un usuario existente"
+    )
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Usuario actualizado",
+                content = @Content(mediaType = "application/json",
+                        schema = @Schema(implementation = Usuario.class))),
+        @ApiResponse(responseCode = "404", description = "Usuario no encontrado"),
+        @ApiResponse(responseCode = "400", description = "Datos inválidos"),
+        @ApiResponse(responseCode = "500", description = "Error en la solicitud")
+    })
+    public ResponseEntity UpdateUser(
+            @RequestBody 
+            @Parameter(description = "Objeto usuario con datos actualizados") Usuario usuario){
         Result result = usuarioJPADAOImplementation.UpdateUser(usuario);
         return ResponseEntity.status(result.StatusCode).body(result);
     }
     
     @PatchMapping("/{IdUsuario}")
-    public ResponseEntity ToggleStatus(@PathVariable int IdUsuario, @RequestParam("status") int Status){
+    @Operation(
+            summary = "Cambiar estado de usuario", 
+            description = "Activa o desactiva un usuario mediante su ID"
+    )
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Estado actualizado"),
+        @ApiResponse(responseCode = "404", description = "Usuario no encontrado"),
+        @ApiResponse(responseCode = "500", description = "Error en la solicitud")
+    })
+    public ResponseEntity ToggleStatus(
+            @PathVariable 
+            @Parameter(description = "Id del usuario", example = "1") int IdUsuario, 
+            @RequestParam("status") 
+            @Parameter(description = "Nuevo estado del usuario (0 = inactivo, 1 = activo)", example = "1") int Status){
         Result result = usuarioJPADAOImplementation.UpdateStatusById(IdUsuario, Status);
         return ResponseEntity.status(result.StatusCode).body(result);
     }
     
     @PostMapping("/{IdUsuario}/updatePhoto")
-    public ResponseEntity UpdatePhoto(@PathVariable int IdUsuario, @RequestBody String imagenUsuario) {
+    @Operation(
+            summary = "Actualizar foto de usuario", 
+            description = "Actualiza la foto de perfil de un usuario"
+    )
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Foto actualizada"),
+        @ApiResponse(responseCode = "404", description = "Usuario no encontrado"),
+        @ApiResponse(responseCode = "500", description = "Error en la solicitud")
+    })
+    public ResponseEntity UpdatePhoto(
+            @PathVariable 
+            @Parameter(description = "Id del usuario", example = "1") int IdUsuario, 
+            @RequestBody 
+            @Parameter(description = "Imagen en formato Base64") String imagenUsuario) {
         Result result = usuarioJPADAOImplementation.UpdatePhoto(IdUsuario, imagenUsuario);
         return ResponseEntity.status(result.StatusCode).body(result);
     }
     
     @DeleteMapping("/{IdUsuario}/photo")
-    public ResponseEntity<Result> deletePhoto(@PathVariable int IdUsuario) {
+    @Operation(
+            summary = "Eliminar foto de usuario", 
+            description = "Elimina la foto de perfil de un usuario"
+    )
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Foto eliminada"),
+        @ApiResponse(responseCode = "404", description = "Usuario no encontrado"),
+        @ApiResponse(responseCode = "500", description = "Error en la solicitud")
+    })
+    public ResponseEntity<Result> deletePhoto(
+            @PathVariable 
+            @Parameter(description = "Id del usuario", example = "1") int IdUsuario) {
         Result result = usuarioJPADAOImplementation.DeletePhoto(IdUsuario);
         return ResponseEntity.status(result.StatusCode).body(result);
     }
     
     @DeleteMapping("/{IdUsuario}")
-    public ResponseEntity DeleteUser(@PathVariable("IdUsuario") int IdUsuario){
+    @Operation(
+            summary = "Eliminar usuario", 
+            description = "Elimina un usuario de la base de datos mediante su ID"
+    )
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Usuario eliminado"),
+        @ApiResponse(responseCode = "404", description = "Usuario no encontrado"),
+        @ApiResponse(responseCode = "500", description = "Error en la solicitud")
+    })
+    public ResponseEntity DeleteUser(
+            @PathVariable("IdUsuario") 
+            @Parameter(description = "Id del usuario", example = "1") int IdUsuario){
         Result result = usuarioJPADAOImplementation.DeleteUserById(IdUsuario);
         return ResponseEntity.status(result.StatusCode).body(result);
     }
     
-    @PostMapping("/cargaMasiva/validar")
+     @PostMapping("/cargaMasiva/validar")
     public ResponseEntity<Result> validarCargaMasiva(@RequestParam("file") MultipartFile file) {
         Result result = new Result();
         
@@ -377,6 +435,4 @@ public class UsuarioRestController {
         
         return usuarios;
     }
-    
-    
 }
