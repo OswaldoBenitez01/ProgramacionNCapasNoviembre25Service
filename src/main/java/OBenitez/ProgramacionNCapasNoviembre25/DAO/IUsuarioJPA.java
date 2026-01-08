@@ -14,7 +14,7 @@ public interface IUsuarioJPA {
     public Result BusquedaUser(Usuario usuario);
 //    //ADDS
     public Result Add(Usuario usuario);
-//    public Result AddAll(List<Usuario> usuarios);
+    public Result AddAll(List<Usuario> usuarios);
 //    //UPDATES
     public Result UpdateUser(Usuario usuario);
     public Result UpdateStatusById(Integer IdUsuario, Integer status);

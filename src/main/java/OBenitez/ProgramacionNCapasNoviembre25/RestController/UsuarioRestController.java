@@ -311,7 +311,7 @@ public class UsuarioRestController {
                 return ResponseEntity.status(result.StatusCode).body(result);
             }
             
-            //result = usuarioJPADAOImplementation.AddAll(usuarios);
+            result = usuarioJPADAOImplementation.AddAll(usuarios);
             result.Correct = true;
             if (result.Correct) {
                 result.Object = "Se agregaron " + usuarios.size() + " usuarios";

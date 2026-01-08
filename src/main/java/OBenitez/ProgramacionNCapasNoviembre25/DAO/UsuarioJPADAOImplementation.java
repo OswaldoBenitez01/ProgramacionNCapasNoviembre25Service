@@ -151,16 +151,16 @@ public class UsuarioJPADAOImplementation implements IUsuarioJPA{
         return result;
     }
 
-//    @Override
-//    @Transactional
-//    public Result AddAll(List<Usuario> usuarios) {
-//        Result result = new Result();
-//        
-//        try {
-//            
-//            for (Usuario usuario : usuarios) {
-//                entityManager.persist(usuario);
-//                entityManager.flush();
+    @Override
+    @Transactional
+    public Result AddAll(List<Usuario> usuarios) {
+        Result result = new Result();
+        
+        try {
+            
+            for (Usuario usuario : usuarios) {
+                entityManager.persist(usuario);
+                entityManager.flush();
 //
 //                OBenitez.ProgramacionNCapasNoviembre25.JPA.Direccion direccion = new OBenitez.ProgramacionNCapasNoviembre25.JPA.Direccion();
 //                direccion.setUsuario(usuario);
@@ -170,17 +170,17 @@ public class UsuarioJPADAOImplementation implements IUsuarioJPA{
 //                direccion.setColonia(usuario.getDirecciones().get(0).getColonia());
 //
 //                entityManager.persist(direccion);
-//            }
-//            
-//            result.Correct = true;
-//        } catch (Exception ex) {
-//            result.Correct = false;
-//            result.ErrorMessage = ex.getLocalizedMessage();
-//            result.ex = ex;
-//        }
-//        
-//        return result;
-//    }
+            }
+            
+            result.Correct = true;
+        } catch (Exception ex) {
+            result.Correct = false;
+            result.ErrorMessage = ex.getLocalizedMessage();
+            result.ex = ex;
+        }
+        
+        return result;
+    }
     
     /////UPDATES
     @Override
