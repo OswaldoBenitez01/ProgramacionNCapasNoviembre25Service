@@ -1,10 +1,7 @@
 package OBenitez.ProgramacionNCapasNoviembre25.DAO;
 
 import OBenitez.ProgramacionNCapasNoviembre25.JPA.Direccion;
-import OBenitez.ProgramacionNCapasNoviembre25.JPA.Result;
+import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface IDireccion {
-    public Result AddAddress(Direccion direccion);
-    public Result UpdateAddressById(Direccion direccion);
-    public Result DeleteAddressById(int IdDireccion);
+public interface IDireccion extends JpaRepository<Direccion, Integer>{
 }

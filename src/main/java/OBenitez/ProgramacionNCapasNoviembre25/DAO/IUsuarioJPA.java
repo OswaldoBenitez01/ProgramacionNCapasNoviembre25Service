@@ -1,25 +1,21 @@
 
 package OBenitez.ProgramacionNCapasNoviembre25.DAO;
 
-import OBenitez.ProgramacionNCapasNoviembre25.JPA.Direccion;
 import OBenitez.ProgramacionNCapasNoviembre25.JPA.Usuario;
-import OBenitez.ProgramacionNCapasNoviembre25.JPA.Result;
 import java.util.List;
-import org.springframework.web.multipart.MultipartFile;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
-public interface IUsuarioJPA {
-    //GET Y SEARCH
-    public Result GetAll();
-    public Result GetById(int IdUsuario);
-    public Result BusquedaUser(Usuario usuario);
-//    //ADDS
-    public Result Add(Usuario usuario);
-    public Result AddAll(List<Usuario> usuarios);
-//    //UPDATES
-    public Result UpdateUser(Usuario usuario);
-    public Result UpdateStatusById(Integer IdUsuario, Integer status);
-    public Result UpdatePhoto(Integer IdUsuario, String imagenUsuario);
-//    //DELETES
-    public Result DeleteUserById(int IdUsuario);
-    public Result DeletePhoto(Integer IdUsuario);
+public interface IUsuarioJPA extends JpaRepository<Usuario, Integer>{
+   List<Usuario> findAllByOrderByIdUsuarioAsc();
+    @Query("SELECT u FROM Usuario u WHERE " +
+           "(:nombre IS NULL OR :nombre = '' OR LOWER(u.nombre) LIKE LOWER(CONCAT('%', :nombre, '%'))) AND " +
+           "(:apellidoPaterno IS NULL OR :apellidoPaterno = '' OR LOWER(u.apellidoPaterno) LIKE LOWER(CONCAT('%', :apellidoPaterno, '%'))) AND " +
+           "(:apellidoMaterno IS NULL OR :apellidoMaterno = '' OR LOWER(u.apellidoMaterno) LIKE LOWER(CONCAT('%', :apellidoMaterno, '%'))) AND " +
+           "(:idRol IS NULL OR u.rol.idRol = :idRol)")
+    List<Usuario> busquedaAbierta(@Param("nombre") String nombre,
+                                   @Param("apellidoPaterno") String apellidoPaterno,
+                                   @Param("apellidoMaterno") String apellidoMaterno,
+                                   @Param("idRol") Integer idRol);
 }

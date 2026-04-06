@@ -1,12 +1,12 @@
 
 package OBenitez.ProgramacionNCapasNoviembre25.RestController;
 
-import OBenitez.ProgramacionNCapasNoviembre25.DAO.UsuarioJPADAOImplementation;
 import OBenitez.ProgramacionNCapasNoviembre25.JPA.Colonia;
 import OBenitez.ProgramacionNCapasNoviembre25.JPA.Direccion;
 import OBenitez.ProgramacionNCapasNoviembre25.JPA.Result;
 import OBenitez.ProgramacionNCapasNoviembre25.JPA.Rol;
 import OBenitez.ProgramacionNCapasNoviembre25.JPA.Usuario;
+import OBenitez.ProgramacionNCapasNoviembre25.Service.UsuarioService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -15,6 +15,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -43,13 +44,13 @@ import org.springframework.web.multipart.MultipartFile;
 @RequestMapping("api/usuario")
 @Tag(name = "API de Usuario", description = "Operaciones CRUD y gestión de usuarios")
 public class UsuarioRestController {
-    
+
     @Autowired
-    private UsuarioJPADAOImplementation usuarioJPADAOImplementation;
-    
+    private UsuarioService usuarioService;
+
     @GetMapping
     @Operation(
-            summary = "Extraer usuarios", 
+            summary = "Extraer usuarios",
             description = "Obtiene un listado de todos los usuarios registrados en la base de datos"
     )
     @ApiResponses(value = {
@@ -59,14 +60,15 @@ public class UsuarioRestController {
         @ApiResponse(responseCode = "404", description = "No se encontraron usuarios"),
         @ApiResponse(responseCode = "500", description = "Error en la solicitud")
     })
-    public ResponseEntity GetAll(){
-        Result result = usuarioJPADAOImplementation.GetAll();
+    public ResponseEntity GetAll() {
+        Result result = usuarioService.GetAll();
         return ResponseEntity.status(result.StatusCode).body(result);
     }
     
+
     @GetMapping("/{IdUsuario}")
     @Operation(
-            summary = "Extraer detalle de usuario", 
+            summary = "Extraer detalle de usuario",
             description = "Obtiene información detallada de un usuario específico"
     )
     @ApiResponses(value = {
@@ -77,15 +79,15 @@ public class UsuarioRestController {
         @ApiResponse(responseCode = "500", description = "Error en la solicitud")
     })
     public ResponseEntity GetById(
-            @PathVariable 
-            @Parameter(description = "Id del usuario", example = "1") int IdUsuario ){
-        Result result = usuarioJPADAOImplementation.GetById(IdUsuario);
+            @PathVariable
+            @Parameter(description = "Id del usuario", example = "1") int IdUsuario) {
+        Result result = usuarioService.GetById(IdUsuario);
         return ResponseEntity.status(result.StatusCode).body(result);
     }
-    
+
     @PostMapping("/busqueda")
     @Operation(
-            summary = "Búsqueda de usuarios", 
+            summary = "Búsqueda de usuarios",
             description = "Realiza una búsqueda de usuarios mediante parámetros enviados en el cuerpo"
     )
     @ApiResponses(value = {
@@ -96,15 +98,15 @@ public class UsuarioRestController {
         @ApiResponse(responseCode = "500", description = "Error en la solicitud")
     })
     public ResponseEntity BusquedaAbierta(
-            @RequestBody 
-            @Parameter(description = "Objeto usuario con parámetros de búsqueda") Usuario usuario){
-        Result result = usuarioJPADAOImplementation.BusquedaUser(usuario);
+            @RequestBody
+            @Parameter(description = "Objeto usuario con parámetros de búsqueda") Usuario usuario) {
+        Result result = usuarioService.BusquedaAbierta(usuario);
         return ResponseEntity.status(result.StatusCode).body(result);
     }
-    
+
     @PostMapping
     @Operation(
-            summary = "Agregar usuario", 
+            summary = "Agregar usuario",
             description = "Agrega un nuevo usuario a la base de datos"
     )
     @ApiResponses(value = {
@@ -115,15 +117,15 @@ public class UsuarioRestController {
         @ApiResponse(responseCode = "500", description = "Error en la solicitud")
     })
     public ResponseEntity Add(
-            @RequestBody 
-            @Parameter(description = "Objeto usuario a registrar") Usuario usuario){
-        Result result = usuarioJPADAOImplementation.Add(usuario);
+            @RequestBody
+            @Parameter(description = "Objeto usuario a registrar") Usuario usuario) {
+        Result result = usuarioService.Add(usuario);
         return ResponseEntity.status(result.StatusCode).body(result);
     }
-    
+
     @PutMapping
     @Operation(
-            summary = "Actualizar usuario", 
+            summary = "Actualizar usuario",
             description = "Actualiza la información de un usuario existente"
     )
     @ApiResponses(value = {
@@ -135,15 +137,15 @@ public class UsuarioRestController {
         @ApiResponse(responseCode = "500", description = "Error en la solicitud")
     })
     public ResponseEntity UpdateUser(
-            @RequestBody 
-            @Parameter(description = "Objeto usuario con datos actualizados") Usuario usuario){
-        Result result = usuarioJPADAOImplementation.UpdateUser(usuario);
+            @RequestBody
+            @Parameter(description = "Objeto usuario con datos actualizados") Usuario usuario) {
+        Result result = usuarioService.UpdateUser(usuario);
         return ResponseEntity.status(result.StatusCode).body(result);
     }
-    
+
     @PatchMapping("/{IdUsuario}")
     @Operation(
-            summary = "Cambiar estado de usuario", 
+            summary = "Cambiar estado de usuario",
             description = "Activa o desactiva un usuario mediante su ID"
     )
     @ApiResponses(value = {
@@ -152,17 +154,17 @@ public class UsuarioRestController {
         @ApiResponse(responseCode = "500", description = "Error en la solicitud")
     })
     public ResponseEntity ToggleStatus(
-            @PathVariable 
-            @Parameter(description = "Id del usuario", example = "1") int IdUsuario, 
-            @RequestParam("status") 
-            @Parameter(description = "Nuevo estado del usuario (0 = inactivo, 1 = activo)", example = "1") int Status){
-        Result result = usuarioJPADAOImplementation.UpdateStatusById(IdUsuario, Status);
+            @PathVariable
+            @Parameter(description = "Id del usuario", example = "1") int IdUsuario,
+            @RequestParam("status")
+            @Parameter(description = "Nuevo estado del usuario (0 = inactivo, 1 = activo)", example = "1") int Status) {
+        Result result = usuarioService.UpdateStatus(IdUsuario, Status);
         return ResponseEntity.status(result.StatusCode).body(result);
     }
-    
+
     @PostMapping("/{IdUsuario}/updatePhoto")
     @Operation(
-            summary = "Actualizar foto de usuario", 
+            summary = "Actualizar foto de usuario",
             description = "Actualiza la foto de perfil de un usuario"
     )
     @ApiResponses(value = {
@@ -171,14 +173,14 @@ public class UsuarioRestController {
         @ApiResponse(responseCode = "500", description = "Error en la solicitud")
     })
     public ResponseEntity UpdatePhoto(
-            @PathVariable 
-            @Parameter(description = "Id del usuario", example = "1") int IdUsuario, 
-            @RequestBody 
+            @PathVariable
+            @Parameter(description = "Id del usuario", example = "1") int IdUsuario,
+            @RequestBody
             @Parameter(description = "Imagen en formato Base64") String imagenUsuario) {
-        Result result = usuarioJPADAOImplementation.UpdatePhoto(IdUsuario, imagenUsuario);
+        Result result = usuarioService.UpdatePhoto(IdUsuario, imagenUsuario);
         return ResponseEntity.status(result.StatusCode).body(result);
     }
-    
+
     @DeleteMapping("/{IdUsuario}/photo")
     @Operation(
             summary = "Eliminar foto de usuario", 
@@ -192,13 +194,13 @@ public class UsuarioRestController {
     public ResponseEntity<Result> deletePhoto(
             @PathVariable 
             @Parameter(description = "Id del usuario", example = "1") int IdUsuario) {
-        Result result = usuarioJPADAOImplementation.DeletePhoto(IdUsuario);
+        Result result = usuarioService.UpdatePhoto(IdUsuario, null);
         return ResponseEntity.status(result.StatusCode).body(result);
     }
     
     @DeleteMapping("/{IdUsuario}")
     @Operation(
-            summary = "Eliminar usuario", 
+            summary = "Eliminar usuario",
             description = "Elimina un usuario de la base de datos mediante su ID"
     )
     @ApiResponses(value = {
@@ -207,16 +209,16 @@ public class UsuarioRestController {
         @ApiResponse(responseCode = "500", description = "Error en la solicitud")
     })
     public ResponseEntity DeleteUser(
-            @PathVariable("IdUsuario") 
-            @Parameter(description = "Id del usuario", example = "1") int IdUsuario){
-        Result result = usuarioJPADAOImplementation.DeleteUserById(IdUsuario);
+            @PathVariable("IdUsuario")
+            @Parameter(description = "Id del usuario", example = "1") int IdUsuario) {
+        Result result = usuarioService.DeleteById(IdUsuario);
         return ResponseEntity.status(result.StatusCode).body(result);
     }
-    
-     @PostMapping("/cargaMasiva/validar")
+
+    @PostMapping("/cargaMasiva/validar")
     public ResponseEntity<Result> validarCargaMasiva(@RequestParam("file") MultipartFile file) {
         Result result = new Result();
-        
+
         try {
             if (file.isEmpty()) {
                 result.Correct = false;
@@ -224,33 +226,33 @@ public class UsuarioRestController {
                 result.StatusCode = 400;
                 return ResponseEntity.status(result.StatusCode).body(result);
             }
-            
+
             String token = UUID.randomUUID().toString();
             String extension = file.getOriginalFilename().split("\\.")[1];
-            
+
             String path = System.getProperty("user.dir");
             String pathArchivo = "src/main/resources/archivos/";
             String rutaAbsoluta = path + "/" + pathArchivo;
-            
+
             String nombreArchivo = token + "." + extension;
             File destino = new File(rutaAbsoluta + nombreArchivo);
             file.transferTo(destino);
-            
+
             List<Usuario> usuarios = new ArrayList<>();
-        
+
             if (extension.equals("txt")) {
                 usuarios = LecturaArchivo(destino);
             } else {
-                usuarios = LecturaArchivoExcel(destino);    
+                usuarios = LecturaArchivoExcel(destino);
             }
-            
+
             if (usuarios.isEmpty()) {
                 result.Correct = false;
                 result.ErrorMessage = "No se encontraron registros en el archivo";
                 result.StatusCode = 400;
                 return ResponseEntity.status(result.StatusCode).body(result);
             }
-            
+
             result.Correct = true;
             result.Object = token;
             result.ErrorMessage = "Se encontraton " + usuarios.size() + " registros";
@@ -261,22 +263,22 @@ public class UsuarioRestController {
             result.ex = ex;
             result.StatusCode = 500;
         }
-        
+
         return ResponseEntity.status(result.StatusCode).body(result);
     }
-    
+
     @PostMapping("/cargaMasiva/procesar/{token}")
-    public ResponseEntity<Result> procesarCargaMasiva(@PathVariable String token){
-    
+    public ResponseEntity<Result> procesarCargaMasiva(@PathVariable String token) {
+
         Result result = new Result();
         try {
             String path = System.getProperty("user.dir");
             String pathArchivo = "src/main/resources/archivos/";
             String rutaAbsoluta = path + "/" + pathArchivo;
-            
+
             File directorio = new File(rutaAbsoluta);
             File[] todosLosArchivos = directorio.listFiles();
-            
+
             File archivo = null;
             if (todosLosArchivos != null) {
                 for (File archivoActual : todosLosArchivos) {
@@ -286,14 +288,14 @@ public class UsuarioRestController {
                     }
                 }
             }
-            
+
             if (archivo == null) {
                 result.Correct = false;
                 result.ErrorMessage = "Archivo no encontrado";
                 result.StatusCode = 404;
                 return ResponseEntity.status(result.StatusCode).body(result);
             }
-            
+
             String nombreArchivo = archivo.getName();
             String extension = nombreArchivo.split("\\.")[1];
             List<Usuario> usuarios = new ArrayList<>();
@@ -301,17 +303,17 @@ public class UsuarioRestController {
             if (extension.equals("txt")) {
                 usuarios = LecturaArchivo(archivo);
             } else {
-                usuarios = LecturaArchivoExcel(archivo);  
+                usuarios = LecturaArchivoExcel(archivo);
             }
-            
+
             if (usuarios == null || usuarios.isEmpty()) {
                 result.Correct = false;
                 result.ErrorMessage = "No se pudieron leer los aregistros del archivo";
                 result.StatusCode = 400;
                 return ResponseEntity.status(result.StatusCode).body(result);
             }
-            
-            result = usuarioJPADAOImplementation.AddAll(usuarios);
+
+            result = usuarioService.AddAll(usuarios);
             result.Correct = true;
             if (result.Correct) {
                 result.Object = "Se agregaron " + usuarios.size() + " usuarios";
@@ -321,7 +323,7 @@ public class UsuarioRestController {
                 result.StatusCode = 400;
             }
         } catch (Exception ex) {
-            result.Correct = true;
+            result.Correct = false;
             result.ErrorMessage = ex.getLocalizedMessage();
             result.ex = ex;
             result.StatusCode = 500;
@@ -330,18 +332,18 @@ public class UsuarioRestController {
     }
 
     private List<Usuario> LecturaArchivo(File archivo) {
-        
+
         List<Usuario> usuarios = new ArrayList<>();
-        
-        try(BufferedReader bufferedReader = new BufferedReader(new FileReader(archivo))){
-            
+
+        try (BufferedReader bufferedReader = new BufferedReader(new FileReader(archivo))) {
+
             bufferedReader.readLine();
             String line;
-            
-            while ((line = bufferedReader.readLine()) != null) {                
-                
+
+            while ((line = bufferedReader.readLine()) != null) {
+
                 String[] datos = line.split("\\|");
-                
+
                 Usuario usuario = new Usuario();
                 usuario.setUsername(datos[0]);
                 usuario.setNombre(datos[1]);
@@ -354,42 +356,41 @@ public class UsuarioRestController {
                 usuario.setTelefono(datos[8]);
                 usuario.setCelular(datos[9]);
                 usuario.setCurp(datos[10]);
-                
+
                 //Direccion
-                usuario.Rol = new Rol();
-                usuario.Rol.setIdRol(Integer.parseInt(datos[11]));
-                
+                usuario.rol = new Rol();
+                usuario.rol.setIdRol(Integer.parseInt(datos[11]));
+
                 //DIRECCION
-                usuario.Direcciones = new ArrayList<>();
+                usuario.direcciones = new ArrayList<>();
                 Direccion Direccion = new Direccion();
                 Direccion.setCalle(datos[12]);
                 Direccion.setNumeroExterior(datos[13]);
                 Direccion.setNumeroInterior(datos[14]);
-                usuario.Direcciones.add(Direccion);
-                
-                Direccion.Colonia = new Colonia();
-                Direccion.Colonia.setIdColonia(Integer.parseInt(datos[15]));
-                
+                usuario.direcciones.add(Direccion);
+
+                Direccion.colonia = new Colonia();
+                Direccion.colonia.setIdColonia(Integer.parseInt(datos[15]));
+
                 usuarios.add(usuario);
             }
-        }
-        catch(Exception ex){
+        } catch (Exception ex) {
             usuarios = null;
         }
-        
+
         return usuarios;
     }
 
     private List<Usuario> LecturaArchivoExcel(File archivo) {
-        
+
         List<Usuario> usuarios = new ArrayList<>();
-        
-         try (XSSFWorkbook workbook = new XSSFWorkbook(archivo)) {
-             
+
+        try (XSSFWorkbook workbook = new XSSFWorkbook(archivo)) {
+
             XSSFSheet sheet = workbook.getSheetAt(0);
 
             for (Row row : sheet) {
-                
+
                 Usuario usuario = new Usuario();
                 Cell cell0 = row.getCell(0);
                 if (cell0 != null) {
@@ -397,42 +398,42 @@ public class UsuarioRestController {
                 } else {
                     continue;
                 }
-                
+
                 usuario.setNombre(row.getCell(1).toString());
                 usuario.setApellidoPaterno(row.getCell(2).toString());
                 usuario.setApellidoMaterno(row.getCell(3).toString());
                 usuario.setEmail(row.getCell(4).toString());
                 usuario.setPassword(row.getCell(5).toString());
-                
+
                 java.util.Date utilDate = row.getCell(6).getDateCellValue();
                 java.sql.Date sqlDate = new java.sql.Date(utilDate.getTime());
                 usuario.setFechaNacimiento(sqlDate);
-                
+
                 usuario.setSexo(row.getCell(7).toString());
                 usuario.setCelular(row.getCell(8).toString());
                 usuario.setTelefono(row.getCell(9).toString());
                 usuario.setCurp(row.getCell(10).toString());
-                
-                usuario.Rol = new Rol();
-                usuario.Rol.setIdRol((int) row.getCell(11).getNumericCellValue());
+
+                usuario.rol = new Rol();
+                usuario.rol.setIdRol((int) row.getCell(11).getNumericCellValue());
                 //DIRECCION
-                usuario.Direcciones = new ArrayList<>();
+                usuario.direcciones = new ArrayList<>();
                 Direccion Direccion = new Direccion();
                 Direccion.setCalle(row.getCell(12).toString());
                 Direccion.setNumeroExterior(row.getCell(13).toString());
                 Direccion.setNumeroInterior(row.getCell(14).toString());
-                usuario.Direcciones.add(Direccion);
-                
-                Direccion.Colonia = new Colonia();
-                Direccion.Colonia.setIdColonia((int) row.getCell(15).getNumericCellValue());
-                
+                usuario.direcciones.add(Direccion);
+
+                Direccion.colonia = new Colonia();
+                Direccion.colonia.setIdColonia((int) row.getCell(15).getNumericCellValue());
+
                 usuarios.add(usuario);
             }
-            
+
         } catch (Exception ex) {
             usuarios = null;
         }
-        
+
         return usuarios;
     }
 }

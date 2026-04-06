@@ -1,7 +1,7 @@
 package OBenitez.ProgramacionNCapasNoviembre25.RestController;
 
-import OBenitez.ProgramacionNCapasNoviembre25.DAO.MunicipioJPADAOImplementation;
 import OBenitez.ProgramacionNCapasNoviembre25.JPA.Result;
+import OBenitez.ProgramacionNCapasNoviembre25.Service.MunicipioService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,11 +13,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("api/municipio")
 public class MunicipioRestController {
     @Autowired
-    private MunicipioJPADAOImplementation municipioJPADAOImplementation;
+    private MunicipioService municipioService;
     
     @GetMapping("estado/{IdEstado}")
     public ResponseEntity GetMunicipiosByEstado(@PathVariable int IdEstado){
-        Result result = municipioJPADAOImplementation.GetMunicipiosByEstado(IdEstado);
+        Result result = municipioService.GetMunicipiosByEstado(IdEstado);
         return ResponseEntity.status(result.StatusCode).body(result);
     }
 }
